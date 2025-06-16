@@ -54,3 +54,20 @@ Na construção dos microsserviços, decidi utilizar o Clean Architecture, garan
 ## Sobre os Desafios Enfrentados
 
 O maior desafio foi retomar uma mentalidade mais voltada ao desenvolvimento, não apenas à arquitetura. Converter princípios como SOLID para a prática, garantir um bom nível de manutenibilidade, desenvolver testes de forma consistente e manter o foco no domínio funcional, evitando dependências de frameworks, linguagens, etc. O maior desafio foi, também, o frontend. Garantir responsividade, manutenibilidade, consistencia e tratamento de erros.
+
+---
+
+## Uso de AI
+
+Aqui a IA foi uma grande aliada em troubleshootings, e, principalmente, testes unitários e Integrados.
+
+---
+
+## Execução
+
+Para a execução ocorrer, basta acessar o link [`Do sistema aqui.`]( http://k8s-default-ingressm-c4afdb6714-237803342.ca-central-1.elb.amazonaws.com/items/1).
+A URL possui um parametro de ID de produto, por isso a sintaxe é esta :  http://ALB_DNS/items/{id_produto}
+Atualmente possuimos apenas 3 produtos, então pode navegar entre:
+- http://ALB_DNS/items/1
+- http://ALB_DNS/items/2
+- http://ALB_DNS/items/3
