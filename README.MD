@@ -10,11 +10,16 @@ Este repositório contém toda a documentação técnica, arquitetural e organiz
 
 ---
 
+## Overview
+
+O desafio técnico do Mercado Livre consistiu no desenvolvimento de uma aplicação clone da página de produtos do Meli. A solução deveria trazer consigo uma página de detalhe de produto, integrando dados de produtos, pagamentos, vendedores e reviews.
+
+
 ## 📂 Repositórios do projeto
 
 | Repositório | Descrição |
 |-------------|-----------|
-| [`frontend-mercadolibre-clone`](https://github.com/MercadoLibre-case/frontend-mercadolibre-clone) | Interface Web do projeto, desenvolvida com Next.js, responsável por consumir os microserviços e renderizar a página de detalhe do produto |
+| [`frontend-mercadolibre-clone`](https://github.com/MercadoLibre-case/product-web) | Interface Web do projeto, desenvolvida com Next.js, responsável por consumir os microserviços e renderizar a página de detalhe do produto |
 | [`ms-product-detail`](https://github.com/MercadoLibre-case/ms-product-detail) | Microserviço responsável pelos dados do produto: título, descrição, imagens, preço, estoque e referência ao vendedor |
 | [`ms-seller`](https://github.com/MercadoLibre-case/ms-seller) | Microserviço responsável por informações do vendedor, como nome da loja, reputação e total de vendas |
 | [`ms-review`](https://github.com/MercadoLibre-case/ms-review) | Microserviço responsável por avaliações e notas dos produtos (ex: estrelas, número de reviews) |
@@ -23,30 +28,29 @@ Este repositório contém toda a documentação técnica, arquitetural e organiz
 
 ---
 
-
 ## 📌 Objetivo do projeto
 
 Construir uma **página de detalhe de produto** inspirada no MercadoLibre, separando o frontend e os serviços backend em microserviços independentes, com comunicação via REST API.
 
 ---
 
-## 📐 Arquitetura
+## 📐 Sobre a Arquitetura da Solução
 
-- **Frontend**: Next.js (React)
-- **Backend**: FastAPI (Python), dividido em microserviços
-- **Persistência**: Arquivos JSON locais (sem banco de dados real)
-- **Comunicação**: REST entre frontend e backend
-- **Documentação**: Swagger/OpenAPI nos serviços + este repositório
-- **Testes**: Cobertura mínima de 80% por serviço
+O projeto foi estruturado seguindo uma abordagem de microserviços, com cada serviço representando um domínio específico da aplicação. A arquitetura foi composta por um canal (frontend), em Next.js, consumindo os microserviços via API. Orientado por domínios funcionais, o backend foi divido em quatro microserviços (Product, Payment, Seller e Review) desenvolvidos em Python (FastAPI). Para a orquestração foi utilizado um serviço gerenciado de Kubernetes em uma cloud pública (EKS AWS), tendo como Ingress um AWS Application Load Balancer. Também fora utilizado o GitHub Actions para automação do build, push das imagens para o ECR e deploy no cluster EKS. Abaixo uma demonstração de alto nível da arquitetura:
+
+![Arquitetura da solução](docs/arquitetura.png)
+
+Todos os microserviços são expostos internamente no cluster através de serviços do tipo ClusterIP, garantindo segurança e isolamento interno. O frontend é exposto externamente por meio do Ingress com ALB, utilizando roteamento por path. O tráfego é balanceado entre múltiplos pods através dos deployments do Kubernetes. Deployments foram configurados para suportar rollout controlado, alta disponibilidade e auto-recuperação. 
+O frontend consome os microserviços utilizando variáveis de ambiente configuradas para os endpoints internos (`http://ms-product-service:8000`, `http://ms-payment-service:8070`, etc.). O DNS interno do Kubernetes resolve automaticamente os nomes dos serviços dentro do cluster. A exposição externa é feita exclusivamente pelo Ingress, eliminando a necessidade de utilizar múltiplos Load Balancers.
 
 ---
 
-## 🗂 Estrutura esperada
+## 📐 Sobre a Arquitetura do Software
 
-```bash
-mercadolibre-clone/
-├── doc-mercadolibre-clone/         📘 ← este repositório
-├── frontend-mercadolibre-clone/    💻
-├── ms-product-detail/              🔧
-├── ms-review/                      ⭐️
-└── ms-payment-methods/             💳
+Na construção dos microsserviços, decidi utilizar o Clean Architecture, garantindo um código mais desacoplado, testável e de fácil manutenção. Dessa forma o código permite que as regras de negócio permaneçam independentes de frameworks, bancos de dados, APIs e qualquer tecnologia externa, facilitando mudanças ou evoluções na aplicação. Esse estilo arquitetural ajuda para a escalabilidade do sistema, garantindo resiliência e se tornando aderente às melhores práticas de desenvolvimento de software.
+
+---
+
+## Sobre os Desafios Enfrentados
+
+O maior desafio foi retomar uma mentalidade mais voltada ao desenvolvimento, não apenas à arquitetura. Converter princípios como SOLID para a prática, garantir um bom nível de manutenibilidade, desenvolver testes de forma consistente e manter o foco no domínio funcional, evitando dependências de frameworks, linguagens, etc. O maior desafio foi, também, o frontend. Garantir responsividade, manutenibilidade, consistencia e tratamento de erros.
