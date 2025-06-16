@@ -1,0 +1,46 @@
+name: Orquestrador - Deploy Completo do Projeto
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-eks:
+    name: Deploy EKS Infraestrutura
+    runs-on: ubuntu-latest
+    steps:
+      - name: Disparar Deploy EKS
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          repository: MercadoLibre-case/eks-infra
+          event-type: deploy
+          client-payload: '{"ref": "main"}'
+
+  deploy-backends:
+    name: Deploy Microserviços Backend
+    runs-on: ubuntu-latest
+    needs: deploy-eks
+    strategy:
+      matrix:
+        repo: [ ms-product, ms-payment-methods, ms-seller, ms-review ]
+    steps:
+      - name: Disparar Deploy ${{ matrix.repo }}
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          repository: MercadoLibre-case/${{ matrix.repo }}
+          event-type: deploy
+          client-payload: '{"ref": "main"}'
+
+  deploy-frontend:
+    name: Deploy Frontend Next.js
+    runs-on: ubuntu-latest
+    needs: deploy-backends
+    steps:
+      - name: Disparar Deploy Frontend
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          repository: MercadoLibre-case/product-webpage
+          event-type: deploy
+          client-payload: '{"ref": "main"}'
