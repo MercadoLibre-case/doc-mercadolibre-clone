@@ -16,6 +16,35 @@ jobs:
           event-type: deploy
           client-payload: '{"ref": "main"}'
 
+      - name: Install jq
+        run: sudo apt-get install jq
+
+      - name: Wait for EKS Deploy to Finish
+        run: |
+          echo "Waiting for EKS Deploy to complete..."
+          runs_url="https://api.github.com/repos/MercadoLibre-case/eks-infra/actions/runs"
+          while :
+          do
+            runs=$(curl -s -H "Authorization: token ${{ secrets.PERSONAL_ACCESS_TOKEN }}" "$runs_url?branch=main&event=repository_dispatch")
+            latest_run_id=$(echo $runs | jq '.workflow_runs[0].id')
+            latest_status=$(echo $runs | jq -r '.workflow_runs[0].status')
+            latest_conclusion=$(echo $runs | jq -r '.workflow_runs[0].conclusion')
+            echo "Latest run ID: $latest_run_id Status: $latest_status Conclusion: $latest_conclusion"
+
+            if [[ "$latest_status" == "completed" ]]; then
+              if [[ "$latest_conclusion" == "success" ]]; then
+                echo "EKS Deploy completed successfully."
+                break
+              else
+                echo "EKS Deploy failed."
+                exit 1
+              fi
+            fi
+            echo "Still running... waiting 30 seconds"
+            sleep 30
+          done
+  
+
   deploy-backends:
     name: Deploy Microserviços Backend
     runs-on: ubuntu-latest
